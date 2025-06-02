@@ -28,16 +28,16 @@ class Plotter:
         mm2cm = 0.1
         for i, track in enumerate(self.event.tracks):
             track_origin = track
-            pdg = track.GetPDGCode()
-            ParentId = track.GetParentId()
-            while pdg != 2112 and ParentId != -1:
-                    track = self.tracks[ParentId]
-                    pdg = track.GetPDGCode()
-                    pdg, track = self.loopover(pdg, track)
-                    ParentId = track.GetParentId()
-            if pdg==2112 and ParentId==-1:
-                depoList = track_origin.association['depoList']
-                ancestor = track_origin.association['ancestor']
+            # pdg = track.GetPDGCode()
+            # ParentId = track.GetParentId()
+            # while pdg != 2112 and ParentId != -1:
+            #         track = self.tracks[ParentId]
+            #         pdg = track.GetPDGCode()
+            #         pdg, track = self.loopover(pdg, track)
+            #         ParentId = track.GetParentId()
+            # if pdg==2112 and ParentId==-1:
+            depoList = track_origin.association['depoList']
+            ancestor = track_origin.association['ancestor']
             
             
             for di in depoList:

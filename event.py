@@ -647,11 +647,14 @@ class Event:
     def loopover(self,pdg,track):
         while pdg != 2112:
             ParentId = track.GetParentId()
-            track = self.tracks[ParentId]
-            pdg = track.GetPDGCode()
             # Break out of the loop if there is no parent (ParentId == -1)
+            # Better if this if statement is here as otherwise it updates track to be the last element of self.tracks if track is not a neutron and has no parent (ParentId = -1)
             if ParentId == -1:
                 break
+
+            track = self.tracks[ParentId]
+            pdg = track.GetPDGCode()
+
         return pdg,track
 
     def PrintTracksEnergy(self):
@@ -720,13 +723,18 @@ class Event:
             pdg = track.GetPDGCode()  # Get the PDG code of the particle
             track_energy = track.energy.get('depoTotal', 0)
             # Trace back to the parent particle until we find a neutron (PDG code 2112)
-            pdg, track = self.loopover(pdg, track)
+            # pdg, track = self.loopover(pdg, track)
             ParentId = track.GetParentId()
-            while pdg == 2112 and ParentId != -1:
+            # while pdg == 2112 and ParentId != -1:
+            #     track = self.tracks[ParentId]
+            #     pdg = track.GetPDGCode()
+            #     pdg, track = self.loopover(pdg, track)
+            #     ParentId = track.GetParentId()
+            while ParentId != -1:
                 track = self.tracks[ParentId]
                 pdg = track.GetPDGCode()
-                pdg, track = self.loopover(pdg, track)
                 ParentId = track.GetParentId()
+
             if pdg == 2112 and ParentId == -1 and track_energy>0.5:
                 # Instead of printing, store the tuple (or you can use a dict)
                 results.append((pdg_original,x,y,z,t))
@@ -866,7 +874,7 @@ class Event:
         print("cos_theta is: ", cos_between)
         return cos_between
 
-    def edep_based_information(self)
+    def edep_based_information(self):
         information=[]
         trig = self.selectneutronevent()
         mm2cm=0.1
