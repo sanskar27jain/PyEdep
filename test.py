@@ -1,4 +1,5 @@
-from event import Event
+# from event import Event
+from event_c import Event
 from plotter import Plotter
 import matplotlib
 import matplotlib.pyplot as plt
@@ -8,9 +9,11 @@ import numpy as np
 n = 10
 counter = 0
 #event = Event("/pnfs/dune/persistent/users/weishi/FD3/LArBath/Marley_Edepsim_noSecondaryDeposit/nue/edep_nue_*.root", 'Marley')
-event = Event("/storage/shared/wshi/atmnu/nue/edep_nue_0.1GeV_1kevts.root", 'Genie')
+event = Event("/storage/shared/wshi/atmnu/nue/edep_nue_1GeV_1kevts.root", 'Genie')
 #event = Event("/exp/dune/app/users/weishi/VDPDSAna/PNSCali/edep_gammas_6.1MeV_10kevts.root", 'Marley')
 p = Plotter(event)
+
+# print("Total no. of events in input file: ", event.nEntry)
 
 print("Look at first", n, "events")
 

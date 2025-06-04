@@ -1,4 +1,6 @@
-from event_first import Event
+# from event_first import Event
+# from event import Event
+from event_c import Event
 import sys
 import numpy as np
 from array import array
@@ -163,6 +165,7 @@ class Writer:
 
         for i in range(self.event.nEntry):
         # for i in range(100):
+        # for i in range(4):
             self.event.Jump(i)
 
             # proc = str(self.event.info['nu_proc']) + '-' + str(self.event.info['nu_nucl'])
@@ -223,7 +226,7 @@ class Writer:
 
             self.N_parList[2] = self.event.info['N_parList'][2]
 
-        self.T_out.Fill()
+            self.T_out.Fill()
 
         self.T_out.Write()
         # print(self.stat)

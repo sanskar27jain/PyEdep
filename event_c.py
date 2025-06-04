@@ -58,7 +58,7 @@ class Event:
 
         self.currentEntry = entryNo
         self.simTree.GetEntry(entryNo)
-         
+
         self.ReadVertex()
         self.ReadTracks()
         self.ReadEnergyDepo('SimEnergyDeposit')
@@ -405,22 +405,27 @@ class Event:
                 # dots/blips
                 depoE_track = 0
                 depoQ_dots = track.energy['depoTotal_charge_th_75keV']
-            depoQ        = self.GetChargeDepoWithDesendents(trkId)[0]
-            depoQ_75keV  = self.GetChargeDepoWithDesendents(trkId)[1]
-            depoQ_500keV = self.GetChargeDepoWithDesendents(trkId)[2]
-            depoQ_MBox        = self.GetChargeMBoxDepoWithDesendents(trkId)[0]
-            depoQ_MBox_75keV  = self.GetChargeMBoxDepoWithDesendents(trkId)[1]
-            depoQ_MBox_500keV = self.GetChargeMBoxDepoWithDesendents(trkId)[2]
-            depoL_220PEpMeV = self.GetLightDepoWithDesendents(trkId)[0]
-            depoL_180PEpMeV = self.GetLightDepoWithDesendents(trkId)[1]
-            depoL_140PEpMeV = self.GetLightDepoWithDesendents(trkId)[2]
-            depoL_100PEpMeV = self.GetLightDepoWithDesendents(trkId)[3]
-            depoL_35PEpMeV  = self.GetLightDepoWithDesendents(trkId)[4]
-            depoL_MBox_220PEpMeV = self.GetLightMBoxDepoWithDesendents(trkId)[0]
-            depoL_MBox_180PEpMeV = self.GetLightMBoxDepoWithDesendents(trkId)[1]
-            depoL_MBox_140PEpMeV = self.GetLightMBoxDepoWithDesendents(trkId)[2]
-            depoL_MBox_100PEpMeV = self.GetLightMBoxDepoWithDesendents(trkId)[3]
-            depoL_MBox_35PEpMeV  = self.GetLightMBoxDepoWithDesendents(trkId)[4]
+
+            chargeDepoWithDesendentsList = self.GetChargeDepoWithDesendents(trkId)
+            depoQ        = chargeDepoWithDesendentsList[0]
+            depoQ_75keV  = chargeDepoWithDesendentsList[1]
+            depoQ_500keV = chargeDepoWithDesendentsList[2]
+            chargeMBoxDepoWithDesendentsList = self.GetChargeMBoxDepoWithDesendents(trkId)
+            depoQ_MBox        = chargeMBoxDepoWithDesendentsList[0]
+            depoQ_MBox_75keV  = chargeMBoxDepoWithDesendentsList[1]
+            depoQ_MBox_500keV = chargeMBoxDepoWithDesendentsList[2]
+            lightDepoWithDesendentsList = self.GetLightDepoWithDesendents(trkId)
+            depoL_220PEpMeV = lightDepoWithDesendentsList[0]
+            depoL_180PEpMeV = lightDepoWithDesendentsList[1]
+            depoL_140PEpMeV = lightDepoWithDesendentsList[2]
+            depoL_100PEpMeV = lightDepoWithDesendentsList[3]
+            depoL_35PEpMeV  = lightDepoWithDesendentsList[4]
+            lightMBoxDepoWithDesendentsList = self.GetLightMBoxDepoWithDesendents(trkId)
+            depoL_MBox_220PEpMeV = lightMBoxDepoWithDesendentsList[0]
+            depoL_MBox_180PEpMeV = lightMBoxDepoWithDesendentsList[1]
+            depoL_MBox_140PEpMeV = lightMBoxDepoWithDesendentsList[2]
+            depoL_MBox_100PEpMeV = lightMBoxDepoWithDesendentsList[3]
+            depoL_MBox_35PEpMeV  = lightMBoxDepoWithDesendentsList[4]
             mom = particle.GetMomentum()
             mass = mom.M()
             KE = mom.E() - mass
@@ -864,14 +869,14 @@ class Event:
             return None
         reconstructed_direction = self.reconstructed_direction()
         true_direction = self.read_neutron_direction()
-        
+
         if (reconstructed_direction is None or true_direction is None or 
     np.allclose(np.array(reconstructed_direction), [0.0, 0.0, 0.0]) or 
     np.allclose(np.array(true_direction), [0.0, 0.0, 0.0])):
 
             print("invalidate direction information")
             return None
-        cos_between = np.dot(reconstructed_direction, true_direction) 
+        cos_between = np.dot(reconstructed_direction, true_direction)
         print("cos_theta is: ", cos_between)
         return cos_between
 
@@ -1065,9 +1070,10 @@ class Event:
         charge_500keV = track.energy['depoTotal_charge_th_500keV']
         children = track.association['children']
         for childId in children:
-            charge += self.GetChargeDepoWithDesendents(childId)[0]
-            charge_75keV += self.GetChargeDepoWithDesendents(childId)[1]
-            charge_500keV += self.GetChargeDepoWithDesendents(childId)[2]
+            chargeDepoWithDesendentsList = self.GetChargeDepoWithDesendents(childId)
+            charge += chargeDepoWithDesendentsList[0]
+            charge_75keV += chargeDepoWithDesendentsList[1]
+            charge_500keV += chargeDepoWithDesendentsList[2]
         return [charge, charge_75keV, charge_500keV]
 
     #-------------------------
@@ -1078,9 +1084,10 @@ class Event:
         charge_500keV = track.energy['depoTotal_charge_MBox_th_500keV']
         children = track.association['children']
         for childId in children:
-            charge += self.GetChargeMBoxDepoWithDesendents(childId)[0]
-            charge_75keV += self.GetChargeMBoxDepoWithDesendents(childId)[1]
-            charge_500keV += self.GetChargeMBoxDepoWithDesendents(childId)[2]
+            chargeMBoxDepoWithDesendentsList = self.GetChargeMBoxDepoWithDesendents(childId)
+            charge += chargeMBoxDepoWithDesendentsList[0]
+            charge_75keV += chargeMBoxDepoWithDesendentsList[1]
+            charge_500keV += chargeMBoxDepoWithDesendentsList[2]
         return [charge, charge_75keV, charge_500keV]
 
     #-------------------------
@@ -1093,11 +1100,12 @@ class Event:
         light_avg_35PEpMeV = track.energy['depoTotal_light_avg_35PEpMeV']
         children = track.association['children']
         for childId in children:
-            light_avg_220PEpMeV += self.GetLightDepoWithDesendents(childId)[0]
-            light_avg_180PEpMeV += self.GetLightDepoWithDesendents(childId)[1]
-            light_avg_140PEpMeV += self.GetLightDepoWithDesendents(childId)[2]
-            light_avg_100PEpMeV += self.GetLightDepoWithDesendents(childId)[3]
-            light_avg_35PEpMeV  += self.GetLightDepoWithDesendents(childId)[4]
+            lightDepoWithDesendentsList = self.GetLightDepoWithDesendents(childId)
+            light_avg_220PEpMeV += lightDepoWithDesendentsList[0]
+            light_avg_180PEpMeV += lightDepoWithDesendentsList[1]
+            light_avg_140PEpMeV += lightDepoWithDesendentsList[2]
+            light_avg_100PEpMeV += lightDepoWithDesendentsList[3]
+            light_avg_35PEpMeV  += lightDepoWithDesendentsList[4]
         return [light_avg_220PEpMeV, light_avg_180PEpMeV, light_avg_140PEpMeV, light_avg_100PEpMeV, light_avg_35PEpMeV]
 
     #-------------------------
@@ -1110,11 +1118,12 @@ class Event:
         light_avg_35PEpMeV  = track.energy['depoTotal_light_avg_35PEpMeV_MBox']
         children = track.association['children']
         for childId in children:
-            light_avg_220PEpMeV += self.GetLightMBoxDepoWithDesendents(childId)[0]
-            light_avg_180PEpMeV += self.GetLightMBoxDepoWithDesendents(childId)[1]
-            light_avg_140PEpMeV += self.GetLightMBoxDepoWithDesendents(childId)[2]
-            light_avg_100PEpMeV += self.GetLightMBoxDepoWithDesendents(childId)[3]
-            light_avg_35PEpMeV  += self.GetLightMBoxDepoWithDesendents(childId)[4]
+            lightMBoxDepoWithDesendentsList = self.GetLightMBoxDepoWithDesendents(childId)
+            light_avg_220PEpMeV += lightMBoxDepoWithDesendentsList[0]
+            light_avg_180PEpMeV += lightMBoxDepoWithDesendentsList[1]
+            light_avg_140PEpMeV += lightMBoxDepoWithDesendentsList[2]
+            light_avg_100PEpMeV += lightMBoxDepoWithDesendentsList[3]
+            light_avg_35PEpMeV  += lightMBoxDepoWithDesendentsList[4]
         return [light_avg_220PEpMeV, light_avg_180PEpMeV, light_avg_140PEpMeV, light_avg_100PEpMeV, light_avg_35PEpMeV]
 
     #-------------------------
