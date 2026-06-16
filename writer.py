@@ -1,6 +1,8 @@
 # from event_first import Event
 # from event import Event
-from event_c import Event
+#from event_c import Event
+# from event_v3 import Event
+from event_v3_light_thres import Event
 import sys
 import numpy as np
 from array import array
@@ -15,7 +17,7 @@ class Writer:
         self.initOutputTree()
 
     def initOutputTree(self):
-        self.T_out = TTree('Sim', 'Sim') # output tree
+        self.T_out = TTree('Sim', 'Sim') # output tree, with name Sim
 
         self.Event_ID = array('i', [0]) #
         self.T_out.Branch('Event_ID', self.Event_ID, 'Event_ID/I')
@@ -49,6 +51,11 @@ class Writer:
 
         self.E_depoTotal_track = array('f', [0]) # total energy deposit from long tracks
         self.T_out.Branch('E_depoTotal_track', self.E_depoTotal_track, 'E_depoTotal_track/F')
+
+        ## FOR DEBUGGING PURPOSES, DELETE LATER ##
+        # self.E_depoTotal_dots = array('f', [0]) # total energy deposit from dots
+        # self.T_out.Branch('E_depoTotal_dots', self.E_depoTotal_dots, 'E_depoTotal_dots/F')
+        ##################################################################################
 
         self.E_depoList_track = np.zeros((8,), dtype=np.float32) # depo for long tracks: lepton, proton, neutron, pi+-, pi0, gamma, alpha, others.
         self.T_out.Branch('E_depoList_track', self.E_depoList_track, 'E_depoList_track[8]/F')
@@ -158,6 +165,47 @@ class Writer:
         self.N_parList = np.zeros((8,), dtype=np.int32) # number of particles for: lepton, proton, neutron, pi+-, pi0, gamma, alpha, others.
         self.T_out.Branch('N_parList', self.N_parList, 'N_parList[8]/I')
 
+        ### TO TEST THE GST TREE FROM GENIE V3 ###
+        self.E_avail_gst = array('d', [0])
+        self.T_out.Branch('E_avail_gst', self.E_avail_gst, 'E_avail_gst/D')
+
+        self.E_avail_pre_FSI_gst = array('d', [0])
+        self.T_out.Branch('E_avail_pre_FSI_gst', self.E_avail_pre_FSI_gst, 'E_avail_pre_FSI_gst/D')
+
+        self.N_parList_gst = np.zeros((8,), dtype=np.int32) # no. of (primary) particles for: lepton, p, n, pi+-, pi0, gamma, alpha, others post-FSI
+        self.T_out.Branch('N_parList_gst', self.N_parList_gst, 'N_parList_gst[8]/I')
+
+        # self.N_parList_pre_FSI_gst = np.zeros((8,), dtype=np.int32) # no. of particles for: lepton, p, n, pi+-, pi0, gamma, alpha, others pre-FSI
+        self.N_parList_pre_FSI_gst = np.zeros((11,), dtype=np.int32) # no. of particles for: lepton, p, n, pi+-, pi0, gamma, alpha, others pre-FSI
+        self.T_out.Branch('N_parList_pre_FSI_gst', self.N_parList_pre_FSI_gst, 'N_parList_pre_FSI_gst[11]/I')
+
+        self.nu_proc_gst = array('i', [0]) # genie process
+        self.T_out.Branch('nu_proc_gst', self.nu_proc_gst, 'nu_proc_gst/I')
+
+        ### More testing ###
+        self.E_availList_dots = np.zeros((8,), dtype=np.float32)
+        self.T_out.Branch('E_availList_dots', self.E_availList_dots, 'E_availList_dots[8]/F')
+
+        self.N_parList_extra = np.zeros((3,), dtype=np.int32)
+        self.T_out.Branch('N_parList_extra', self.N_parList_extra, 'N_parList_extra[3]/I')
+
+        self.N_pipmList_gst = np.zeros((2,), dtype=np.int32)
+        self.T_out.Branch('N_pipmList_gst', self.N_pipmList_gst, 'N_pipmList_gst[2]/I')
+
+        ### L THRESHOLD ###
+        self.L_depoTotal_avg_180PEpMeV_th_75keV = array('f', [0]) # total light deposit from all (charged) tracks with mean light yield 180PE/MeV with a dL > 75 keV threshold applied to each hit
+        self.T_out.Branch('L_depoTotal_avg_180PEpMeV_th_75keV', self.L_depoTotal_avg_180PEpMeV_th_75keV, 'L_depoTotal_avg_180PEpMeV_th_75keV/F')
+
+        self.L_depoList_avg_180PEpMeV_th_75keV = np.zeros((8,), dtype=np.float32) # light depo with mean LY 180PE/MeV and 75keV dL cut for: lepton, proton, neutron, pi+-, pi0, gamma, alpha, others.
+        self.T_out.Branch('L_depoList_avg_180PEpMeV_th_75keV', self.L_depoList_avg_180PEpMeV_th_75keV, 'L_depoList_avg_180PEpMeV_th_75keV[8]/F')
+
+        self.L_depoTotal_avg_180PEpMeV_th_500keV = array('f', [0]) # total light deposit from all (charged) tracks with mean light yield 180PE/MeV with a dL > 500 keV threshold applied to each hit
+        self.T_out.Branch('L_depoTotal_avg_180PEpMeV_th_500keV', self.L_depoTotal_avg_180PEpMeV_th_500keV, 'L_depoTotal_avg_180PEpMeV_th_500keV/F')
+
+        self.L_depoList_avg_180PEpMeV_th_500keV = np.zeros((8,), dtype=np.float32) # light depo with mean LY 180PE/MeV and 500keV dL cut for: lepton, proton, neutron, pi+-, pi0, gamma, alpha, others.
+        self.T_out.Branch('L_depoList_avg_180PEpMeV_th_500keV', self.L_depoList_avg_180PEpMeV_th_500keV, 'L_depoList_avg_180PEpMeV_th_500keV[8]/F')
+
+
     def Write(self):
         # self.stat = {
         # }
@@ -181,6 +229,7 @@ class Writer:
             self.E_avail[0] = self.event.info['E_avail']
             self.E_depoTotal[0] = self.event.info['E_depoTotal']
             self.E_depoTotal_track[0] = self.event.info['E_depoTotal_track']
+            # self.E_depoTotal_dots[0] = self.event.info['E_depoTotal_dots'] ## DEBUGGING PURPOSES
             self.Q_depoTotal[0] = self.event.info['Q_depoTotal']
             self.Q_depoTotal_th_75keV[0] = self.event.info['Q_depoTotal_th_75keV']
             self.Q_depoTotal_th_500keV[0] = self.event.info['Q_depoTotal_th_500keV']
@@ -226,16 +275,46 @@ class Writer:
 
             self.N_parList[2] = self.event.info['N_parList'][2]
 
+            ### TO TEST THE GST TREE FROM GENIE V3 ###
+            if 'E_avail_gst' in self.event.info.keys():
+                self.E_avail_gst[0] = self.event.info['E_avail_gst']
+                self.E_avail_pre_FSI_gst[0] = self.event.info['E_avail_pre_FSI_gst']
+                self.N_parList_gst[:] = self.event.info['N_parList_gst']
+                self.N_parList_pre_FSI_gst[:] = self.event.info['N_parList_pre_FSI_gst']
+                self.nu_proc_gst[0] = self.event.info['nu_proc_gst']
+
+            ### More testing ###
+            if 'E_availList_dots' in self.event.info.keys():
+                self.E_availList_dots[:] = self.event.info['E_availList_dots']
+                self.N_parList_extra[:]  = self.event.info['N_parList_extra']
+            if 'N_pi+-List_gst' in self.event.info.keys():
+                self.N_pipmList_gst[:]  = self.event.info['N_pi+-List_gst']
+
+            ### IF L WITH dL CUT INFORMATION IS AVAILABLE ###
+            if 'L_depoTotal_avg_180PEpMeV_th_75keV' in self.event.info.keys():
+                self.L_depoTotal_avg_180PEpMeV_th_75keV[0] = self.event.info['L_depoTotal_avg_180PEpMeV_th_75keV']
+                self.L_depoList_avg_180PEpMeV_th_75keV[:] = self.event.info['L_depoList_avg_180PEpMeV_th_75keV']
+
+                self.L_depoTotal_avg_180PEpMeV_th_500keV[0] = self.event.info['L_depoTotal_avg_180PEpMeV_th_500keV']
+                self.L_depoList_avg_180PEpMeV_th_500keV[:] = self.event.info['L_depoList_avg_180PEpMeV_th_500keV']
+
             self.T_out.Fill()
 
         self.T_out.Write()
         # print(self.stat)
 
 if __name__ == "__main__":
-    if (len(sys.argv)>3):
-        outfile = sys.argv[3]
+    #if (len(sys.argv)>3):
+    #    outfile = sys.argv[3]
+    #else:
+    #    outfile = 'output.root'
+    #event = Event(sys.argv[1], sys.argv[2])
+    # For v3 testing with GST file
+    if (len(sys.argv)>4):
+        outfile = sys.argv[4]
     else:
         outfile = 'output.root'
-    event = Event(sys.argv[1], sys.argv[2])
+    # Now, sys.argv[1] is the input .root file, sys.argv[2] is the input .gst file, and sys.argv[3] is the evgen.
+    event = Event(sys.argv[1], sys.argv[2], sys.argv[3])
     w = Writer(event, outfile)
     w.Write()
