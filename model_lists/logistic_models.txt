@@ -1,0 +1,9 @@
+Features,Model
+Q75,Logistic
+Q75 L,Logistic
+Q75 Q500,Logistic
+Q75 Q500 L,Logistic
+L75,Logistic
+L75 Q,Logistic
+L75 L500,Logistic
+L75 L500 Q,Logistic
