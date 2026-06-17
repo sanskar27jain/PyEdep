@@ -27,6 +27,11 @@ class EventsTreeReader:
         self.out_filename = out_filename
         self.cv_score = cv_score
 
+        # from stack overflow
+        import matplotlib as mpl
+        mpl.rcParams['text.usetex'] = True
+        mpl.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}' #for \text command
+
         ###### OLD CONTROL STRUCTURE ######
         self.model = model
         self.features = f_option
@@ -204,7 +209,7 @@ class EventsTreeReader:
     #---------------------------------------------------
     def plotMetrics(self, option="ConfusionMatrix"):
         subplot_mosaic = np.array([f'CM{i}' for i in range(len(self.output_list))])                                     #|
-        subplot_mosaic = np.append( subplot_mosaic, np.array( ['.']*( 4 - (len(subplot_mosaic)%4) ) ) ).reshape(-1, 4)  #| -> Creates a nested list called subplot_mosaic which looks like [['.', 'CM0', 'CM1', 'CM2', 'CM3',],          
+        subplot_mosaic = np.append( subplot_mosaic, np.array( ['.']*( (-len(subplot_mosaic))%4 ) ) ).reshape(-1, 4)     #| -> Creates a nested list called subplot_mosaic which looks like [['.', 'CM0', 'CM1', 'CM2', 'CM3',],          
         subplot_mosaic = np.append(np.array([['.']*subplot_mosaic.shape[0]]).T, subplot_mosaic, axis=1)                 #|                                                                  ['.', 'CM4', 'CM5', 'CM6', 'CM7',],...
         subplot_mosaic = subplot_mosaic.tolist() + [['.']+['ROC']*4]                                                    #|                                                               ...['.', 'ROC', 'ROC', 'ROC', 'ROC' ]]   
         print("Subplot mosaic\n",subplot_mosaic)                                                             
@@ -257,7 +262,7 @@ class EventsTreeReader:
                                                 y_scores=out_dict['Decision scores'],
                                                 nbins=100,                                          
                                                 rm_outliers=(self.model_list[i][1]=="AdaBDT"))  # AdaBDT decision-function-score distribution for true antinue events seem to have few **large** outliers!
-                                                                                                # To be able to see the bulk distribution, only display the "median 98%" of the y_scores. 
+                                                                                                # To be able to see the bulk distribution, only display the "median 95%" of the y_scores. 
             # Title subplots by model and features used
             ax_dict[f'CM{i}'].set_title(f"{self.model_list[i][1]} model, using {self.model_list[i][0]}")
             
@@ -302,11 +307,11 @@ class EventsTreeReader:
         antinue_scores = y_scores[y_true==-1]
         
         # AdaBDT decision-function-score distribution for true antinue events seem to have few **large** outliers!
-        # To be able to see the bulk distribution, only display the "median 98%" of the y_scores. 
+        # To be able to see the bulk distribution, only display the "median 95%" of the y_scores. 
         if rm_outliers:
-            pcntile1, pcntile99 = np.quantile(y_scores, (0.01,0.99))
-            nue_in_mask     = (nue_scores     >= pcntile1)&(nue_scores     <= pcntile99)
-            antinue_in_mask = (antinue_scores >= pcntile1)&(antinue_scores <= pcntile99)
+            pcntile2_5, pcntile97_5 = np.quantile(y_scores, (0.025,0.975))
+            nue_in_mask     = (nue_scores     >= pcntile2_5)&(nue_scores     <= pcntile97_5)
+            antinue_in_mask = (antinue_scores >= pcntile2_5)&(antinue_scores <= pcntile97_5)
             ax.hist(nue_scores[nue_in_mask],         bins=nbins, histtype='step', color='blue', label=r"True $\nu_e$ events"      +f"({np.sum(nue_in_mask    )}/{len(nue_scores    )} evts)")   
             ax.hist(antinue_scores[antinue_in_mask], bins=nbins, histtype='step', color='red',  label=r"True $\bar{\nu_e}$ events"+f"({np.sum(antinue_in_mask)}/{len(antinue_scores)} evts)")
         else:
@@ -1094,7 +1099,8 @@ class EventsTreeReader:
                             scoring=self.cv_score, 
                             refit=True, 
                             cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=42),
-                            n_jobs=4)  
+                            # n_jobs=4)  
+                            n_jobs=32)  
         
         # The parallelization for GridSearchCV is implemented using joblib (statements involving Parallel(...)), specifically the "loky" backend, which will automatically limit the number of threads used by lower-level child processes (like those called by NumPy routines / some base-estimator fitting routines) 
         # Each child proccess is limited to max_threads = n_cpus // n_jobs (where n_jobs is the GridSearchCV parameter, which gets passed into the parallel = Parallel(...) constructor. Then the parallel loop is defined within --> with parallel: ... )   
